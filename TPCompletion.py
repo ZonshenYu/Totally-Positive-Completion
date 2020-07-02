@@ -156,7 +156,7 @@ def guessCompletableFilledIn(arr, trials):
 			rowPos = entry[0]
 			colPos = entry[1]
 			lowerbound = GeneralLowerBound
-			upperBound = GeneralUpperBound 
+			upperbound = GeneralUpperBound 
 			if (rowPos, colPos) in lowerBounds:
 				lowerbound = lowerBounds[(rowPos, colPos)]
 			
@@ -191,7 +191,8 @@ def guessCompletableNotFilledIn(arr):
 def tester(): 
 	#np.set_printoptions(precision=1)
 	#print(np.array([1.124125]))
-	test = np.array([[1, 2, 1], [0, 1, 1], [0, 1, 2]])
+	test = np.array([[9999999999,0, 2], [4, 1, 0], [2, 1, 0]])
+#	test = np.array([[1, 0, 0, 1], [1, 1, 1, 2], [0, 1, 2, 0]])
 	print(test)
 	#print(np.linalg.det(test))
 	#isTP = checkTP(test, True)
