@@ -77,7 +77,7 @@ def checkTP(arr, debug):
 
 #given a partial TP matrix with data for the specified entries, tests for completablility. 
 #zeroes are still used for designating unspecified entries
-def guessCompletableFilledIn(arr, trials):
+def guessCompletableFilledIn(arr, trials, debug):
 	arr = arr.astype('float64') #because we usually only input integers, without this line, python casts the random numbers below to integers too
 	unspecList = []
 	for i in range(len(arr)):
@@ -148,7 +148,7 @@ def guessCompletableFilledIn(arr, trials):
 #	for x,y in upperBounds.items():
 #		print(x,y)	
 	#a random search 
-	GeneralUpperBound = np.amax(arr)*2 #this is worth experimenting with
+	GeneralUpperBound = np.amax(arr)*10 #this is worth experimenting with
 	GeneralLowerBound = .001 #probably not good to go too low, it'll clash with the determinant bound for '0'
 	foundComp = False 
 	for i in range(trials):
@@ -165,14 +165,17 @@ def guessCompletableFilledIn(arr, trials):
 			arr[rowPos][colPos] = random.uniform(lowerbound, upperbound)
 		isTP = checkTP(arr, False)
 		if isTP:
-			print("Completion found")
-			print(arr)
+			if debug:
+				print("Completion found")
+				print(arr)
 			foundComp = True 
 			break 
-	print("Random search finished.")
-	if not foundComp:
+	if debug:
+		print("Random search finished.")
+	if not foundComp and debug:
 		print("A random search suggests this is not a completable partial matrix")
 	
+	return foundComp
 	#TODO: even better guessing, find immediate contradiction, although I don't think that will happen much, if at all
 	
 #takes in a pattern in the form of a (0,1)-matrix, 0 being unspecified, 1 being unspecified, and attempts to guess if the pattern is completable 	
@@ -181,18 +184,66 @@ def guessCompletableNotFilledIn(arr):
 	arr = arr.astype('float64') #because we usually only input integers, without this line, python casts the random numbers below to integers too
 	unspecList = []
 	specList = []
+	trialsFilledIn = 10000
+	isTP = True
 	for i in range(len(arr)):
 		for j in range(len(arr[0])):
 			if arr[i][j] == 0:
 				unspecList.append([i,j])
 			else:
 				specList.append([i,j])
+	filledIn = arr
+	for i in range(len(arr)):
+		for j in range(len(arr[0])):
+			filledIn[i][j] = 0
+
+	#first, fill in with 1s and then just increment if 1s are not possible 
+	for i in range(len(arr)):
+		for j in range(len(arr[0])):
+			temp = [i,j]
+			if temp in specList:
+				filledIn[i][j] = 1
+				while(not checkPartialTP(filledIn, False)):
+					filledIn[i][j] = filledIn[i][j]+1
+	isTP = guessCompletableFilledIn(filledIn, trialsFilledIn, False)
+	if not isTP:
+		print("This is a obstruction!")
+		print("Here is the data for the specified entries")
+		print(filledIn)
+		return False
 	
+	#now, random searching 
+	trials = 1000
+	randomLowerBound = 0
+	randomUpperBound = 10 #this was at 100 originally, and the code struggled with completing these matrices
+	for k in range(trials):
+		for i in range(len(arr)):
+			for j in range(len(arr[0])):
+				filledIn[i][j] = 0
+		for i in range(len(arr)):
+			for j in range(len(arr[0])):
+				temp = [i,j]
+				if temp in specList:
+					filledIn[i][j] = random.uniform(randomLowerBound, randomUpperBound)
+					#this might infinite loop
+					while(not checkPartialTP(filledIn, False)):
+						filledIn[i][j] = random.uniform(randomLowerBound,randomUpperBound)
+		
+		isTP = guessCompletableFilledIn(filledIn, trialsFilledIn, False)
+		if not isTP: 
+				print("This is a obstruction based on random data!")
+				print("Here is the data for the specified entries")
+				print(filledIn)
+				return False
+	print("Likely TP completable")
+	return True 
 def tester(): 
 	#np.set_printoptions(precision=1)
 	#print(np.array([1.124125]))
-	test = np.array([[9999999999,0, 2], [4, 1, 0], [2, 1, 0]])
-#	test = np.array([[1, 0, 0, 1], [1, 1, 1, 2], [0, 1, 2, 0]])
+#	test = np.array([[3.46514042,0, 7.10280744], [0, 0.24462701, 0], [8.80677369, 5.07579122, 0]])
+	test = np.array([[3.6 ,0, 7], [0, 0.25, 0], [9, 5, 0]])
+	testPattern = np.array([[1,0, 1], [0, 1, 1], [1, 1, 0]])
+#	test = np.array([[1, 0, 0, 1], [1, 1, 1, 2], [0, 1, 2, 999999999]])
 	print(test)
 	#print(np.linalg.det(test))
 	#isTP = checkTP(test, True)
@@ -208,6 +259,7 @@ def tester():
 #		print("The matrix is TP")
 #	else:
 #		print("The matrix is not TP")
-	guessCompletableFilledIn(test, 1000)
+	guessCompletableFilledIn(test, 100000, True)
+#	guessCompletableNotFilledIn(testPattern)
 
 tester()
