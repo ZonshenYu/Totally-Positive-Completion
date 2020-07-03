@@ -2,6 +2,7 @@ import random
 import math
 import numpy as np
 import itertools
+import re 
 
 #checks partial TP by treating 0 values as unspecified
 #this just checks every single possible minor, so it is not efficient 
@@ -215,7 +216,7 @@ def guessCompletableNotFilledIn(arr):
 	#now, random searching 
 	trials = 1000
 	randomLowerBound = 0
-	randomUpperBound = 10 #this was at 100 originally, and the code struggled with completing these matrices
+	randomUpperBound = 10 #this was at 100 originally, and the code struggled with completing these matrices. It still struggles here honestly
 	for k in range(trials):
 		for i in range(len(arr)):
 			for j in range(len(arr[0])):
@@ -237,11 +238,33 @@ def guessCompletableNotFilledIn(arr):
 				return False
 	print("Likely TP completable")
 	return True 
+
+#given a code like 2310, generates a 3 by n pattern ( 0,1 matrix ) such that the only unspecified entry in column i is in row code[i:i+1]-1 (0 corresponds to no unspecified entries)
+def generateMatrixFromCode(code):
+	arr = np.ones((3, len(code)))
+	for i in range(len(code)):
+		curr = int(code[i:i+1]) - 1
+		if curr > -1:
+			arr[i][curr] = 0
+	return arr
+
+#generates codes for possible minimal 3 by (length) obstructions, avoiding codes in otherObstructions that are contiguously in them 
+def generatePossibleMinimal(length, otherObstructions):
+	codes = [''.join(i) for i in itertools.product("0123", repeat = length)]
+	#removes matrices with 2 fully specified columns in the middle 
+	codes = [i for i in codes if re.match(".00.", i) is None]
+	#removes those which contain contiguous submatrices that are in otherObstructions 
+	codes = [i for i in codes if not any(x in i for x in otherObstructions)]
+	
+	#expansions of obstructions
+	print(codes)
+	return codes
+	
 def tester(): 
 	#np.set_printoptions(precision=1)
 	#print(np.array([1.124125]))
 #	test = np.array([[3.46514042,0, 7.10280744], [0, 0.24462701, 0], [8.80677369, 5.07579122, 0]])
-	test = np.array([[3.6 ,0, 7], [0, 0.25, 0], [9, 5, 0]])
+	test = np.array([[3.6 ,0, 7], [0, 0.25, 0], [9, 5, 0]]) #at the very least, the matrices we care about will have many specified entries, hence providing many bounds
 	testPattern = np.array([[1,0, 1], [0, 1, 1], [1, 1, 0]])
 #	test = np.array([[1, 0, 0, 1], [1, 1, 1, 2], [0, 1, 2, 999999999]])
 	print(test)
@@ -259,7 +282,10 @@ def tester():
 #		print("The matrix is TP")
 #	else:
 #		print("The matrix is not TP")
-	guessCompletableFilledIn(test, 100000, True)
+	guessCompletableFilledIn(test, 10000, True)
 #	guessCompletableNotFilledIn(testPattern)
+	
 
 tester()
+
+generatePossibleMinimal(4, ["1"])
