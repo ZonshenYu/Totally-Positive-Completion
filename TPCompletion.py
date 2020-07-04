@@ -258,7 +258,9 @@ def generateMatrixFromCode(code):
         if curr > -1:
             arr[i][curr] = 0
     return arr
-#given a code, returns the code corresponding to its 180 degree reflection
+
+
+#given a code, returns the code corresponding to its 180 degree rotation
 def reflection(string):
     #empty string which we will join our data to
     s = ''
