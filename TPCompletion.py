@@ -157,7 +157,7 @@ def guessCompletableFilledIn(arr, trials, debug):
     #		print(x,y)
     # a random search
     GeneralUpperBound = np.amax(arr) * 10  # this is worth experimenting with
-    #calculates a general upper bound, ignoring the (1,1) and (1,n) positions
+    #calculates a general upper bound, ignoring the (1,1) and (3,n) positions
     arrminuscorners = arr.copy()
     arrminuscorners[0, 0] = np.nan
     arrminuscorners[-1, -1] = np.nan
