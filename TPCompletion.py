@@ -161,7 +161,7 @@ def guessCompletableFilledIn(arr, trials, debug):
     arrminuscorners = arr.copy()
     arrminuscorners[0, 0] = np.nan
     arrminuscorners[-1, -1] = np.nan
-    GeneralUpperBoundNoCorners = np.nanmax(arr)*2
+    GeneralUpperBoundNoCorners = np.nanmax(arrminuscorners)*2
     #
     GeneralLowerBound = .001  # probably not good to go too low, it'll clash with the determinant bound for '0'
     foundComp = False
@@ -303,7 +303,6 @@ def generatePossibleMinimal(length, otherObstructions):
     print(codes)
     return codes
 ##
-## function takes in a string corresponding to a 3 by n matrix and returns its 180 degree reflection
 
 ##
 def tester():
