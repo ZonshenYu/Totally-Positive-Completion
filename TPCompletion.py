@@ -260,7 +260,6 @@ def generateMatrixFromCode(code):
     return arr
 
 def reflection(string):
-    print(string)
     #empty string which we will join our data to
     s = ''
     #newArray is an array that keeps track of the values in the string.
