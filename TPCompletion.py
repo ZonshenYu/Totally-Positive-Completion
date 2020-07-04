@@ -3,7 +3,7 @@ import math
 import numpy as np
 import itertools
 import re
-
+import mystic
 
 # checks partial TP by treating 0 values as unspecified
 # this just checks every single possible minor, so it is not efficient
@@ -157,12 +157,11 @@ def guessCompletableFilledIn(arr, trials, debug):
     #		print(x,y)
     # a random search
     GeneralUpperBound = np.amax(arr) * 10  # this is worth experimenting with
-    #calculates a general upper bound, ignoring the (1,1) and (3,n) positions
     arrminuscorners = arr.copy()
     arrminuscorners[0, 0] = np.nan
     arrminuscorners[-1, -1] = np.nan
-    GeneralUpperBoundNoCorners = np.nanmax(arrminuscorners)*2
-    #
+    #calculates a general upper bound, ignoring the (1,1) and (n,1) positions
+    GeneralUpperBoundNoCorners = np.nanmax(arr)*2
     GeneralLowerBound = .001  # probably not good to go too low, it'll clash with the determinant bound for '0'
     foundComp = False
     for i in range(trials):
@@ -303,6 +302,7 @@ def generatePossibleMinimal(length, otherObstructions):
     print(codes)
     return codes
 ##
+## function takes in a string corresponding to a 3 by n matrix and returns its 180 degree reflection
 
 ##
 def tester():
@@ -310,7 +310,7 @@ def tester():
     # print(np.array([1.124125]))
     #	test = np.array([[3.46514042,0, 7.10280744], [0, 0.24462701, 0], [8.80677369, 5.07579122, 0]])
     test = np.array([[3.6, 0, 7], [0, 0.25, 0], [9, 5,
-                                                 0]])  # at the very least, the matrices we care about will have many specified entries, hence providing many bounds
+                                                 99999]])  # at the very least, the matrices we care about will have many specified entries, hence providing many bounds
     testPattern = np.array([[1, 0, 1], [0, 1, 1], [1, 1, 0]])
     #	test = np.array([[1, 0, 0, 1], [1, 1, 1, 2], [0, 1, 2, 999999999]])
     print(test)
