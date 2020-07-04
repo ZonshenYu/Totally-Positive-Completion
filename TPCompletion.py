@@ -258,7 +258,7 @@ def generateMatrixFromCode(code):
         if curr > -1:
             arr[i][curr] = 0
     return arr
-
+#given a code, returns the code corresponding to its 180 degree reflection
 def reflection(string):
     #empty string which we will join our data to
     s = ''
@@ -266,7 +266,7 @@ def reflection(string):
     stringArray = [int(i) for i in string]
     #newArray is generated so we don't override data when swapping items around
     newArray = [0  for i in range(len(stringArray))]
-    #swaps the order of unspecified entries
+    #swaps the order of unspecified entries in the given pattern
     for i in range(len(stringArray)):
         if(stringArray[i] == 1):
             newArray[i] = 3
@@ -275,7 +275,7 @@ def reflection(string):
         elif(stringArray[i] == 3):
             newArray[i] = 1
 
-    #reverses pattern
+    #reverses the columns in the pattern
     for entry in reversed(newArray):
         s += str(entry)
     return(s)
