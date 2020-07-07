@@ -142,13 +142,13 @@ def guessCompletableFilledIn(arr, trials, debug):
 							upperBounds[(l,k)] = newupperbound 
 	
 	#tester for lower and upper bounds, note that these are 0 indexed
-#	print("LOWER BOUNDS:")	
-#	for x,y in lowerBounds.items():
-#		print(x,y)
+	print("LOWER BOUNDS:")	
+	for x,y in lowerBounds.items():
+		print(x,y)
 		
-#	print("UPPER BOUNDS:")	
-#	for x,y in upperBounds.items():
-#		print(x,y)	
+	print("UPPER BOUNDS:")	
+	for x,y in upperBounds.items():
+		print(x,y)	
 	#a random search 
 	#calculates a general upper bound, ignoring the (1,1) and (m,n) positions
 #	GeneralUpperBound = np.amax(arr)*10 #this is worth experimenting with
@@ -169,6 +169,8 @@ def guessCompletableFilledIn(arr, trials, debug):
 				
 			if (rowPos, colPos) in upperBounds:
 				upperbound = upperBounds[(rowPos, colPos)]
+			if upperbound == GeneralUpperBoundNoCorners and upperbound < lowerbound and not lowerbound == GeneralLowerBound: #sometimes this happens with really small numbers, the lower bound gets moved up really high
+				upperbound = 2*lowerbound 
 			arr[rowPos][colPos] = random.uniform(lowerbound, upperbound)
 			
 			if rowPos ==0 and colPos ==0:
@@ -242,12 +244,21 @@ def guessCompletableNotFilledIn(arr):
 			for j in range(len(arr[0])):
 				temp = [i,j]
 				if temp in specList:
-					filledIn[i][j] = random.uniform(randomLowerBound, randomUpperBound)
-					#this might infinite loop
-					
-					while(not checkPartialTP(filledIn, False)) and count < hardCap:
-						filledIn[i][j] = random.uniform(randomLowerBound,randomUpperBound)
-						count = count + 1
+					#we are free to do scaling to force the first column and row to be 1 (for the specified entries)
+					if i == 0 or j == 0:
+						filledIn[i][j] = 1 
+					else:
+						filledIn[i][j] = random.uniform(randomLowerBound, randomUpperBound)
+						#this might infinite loop	
+						while(not checkPartialTP(filledIn, False)) and count < hardCap:
+							if count < hardCap -10:
+								filledIn[i][j] = random.uniform(randomLowerBound,randomUpperBound)
+							else: #if nothing seems to work, let it go really big
+								indices = (-filledIn).argpartition(2, axis =None)[:2] #should find 2 largest values in the array
+								x,y = np.unravel_index(indices, filledIn.shape) #gets the actual indices
+								largestVal = filledIn[x,y]
+								filledIn[i][j] = random.uniform(largestVal[0]*largestVal[1], 2*largestVal[0]*largestVal[1]/np.min(arr[np.nonzero(arr)])) #this is mostly for when the min value is < 1
+							count = count + 1
 		if count == hardCap:
 			continue
 		isTP = guessCompletableFilledIn(filledIn, trialsFilledIn, False)
@@ -297,7 +308,7 @@ def generatePossibleMinimal(length, otherObstructions):
 	codes = [i for i in codes if not any(x in i for x in otherObstructions)]
 	#removes those whose 180 degree reflections are also in otherObstructions
 	codes = [i for i in codes if not str(reflection(i)) in otherObstructions]
-	#expansions of obstructions
+	#expansions of obstructions, things we know are completable like 0-1 unspecified
 #	print(codes)
 	return codes
 
@@ -320,7 +331,7 @@ def tester():
 	#np.set_printoptions(precision=1)
 	#print(np.array([1.124125]))
 #	test = np.array([[3.46514042,0, 7.10280744], [0, 0.24462701, 0], [8.80677369, 5.07579122, 0]])
-	test = np.array([[1.73607, 1.833855, 5.555477], [1.8720452, 6.222746, 0], [0, 0, 5.25966137]]) #at the very least, the matrices we care about will have many specified entries, hence providing many bounds
+	test = np.array([[1, 1, 1], [1, 0, 0], [0, 9.13371718,  9.35585903]]) #at the very least, the matrices we care about will have many specified entries, hence providing many bounds
 	testPattern = np.array([[0,1, 1], [1, 1, 1], [1, 1, 0]])
 #	test = np.array([[1, 0, 0, 1], [1, 1, 1, 2], [0, 1, 2, 0]])
 	print(test)
@@ -338,9 +349,9 @@ def tester():
 #		print("The matrix is TP")
 #	else:
 #		print("The matrix is not TP")
-#	guessCompletableFilledIn(test, 100000, True)
+	guessCompletableFilledIn(test, 10000, True)
 #	guessCompletableNotFilledIn(testPattern)
-	findObstructions(3)
+#	findObstructions(3)
 	
-#todo scale 1s which seems to let our lower bound be 1, cases for bound?
+#todo scale 1s which seems to let our lower bound be 1, cases for bound?, don't check cases that are obviously obstructions, get more 1s scaled, use bounds with ab > c or ab < c (a,b unspecified, c constant)
 tester()
